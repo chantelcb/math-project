@@ -1,63 +1,168 @@
-/*
-  Vector addition demo (plain JavaScript + SVG, no libraries needed).
-  Looks for <div id="vector-demo"> on the page. See lessons/10-addition-vectors.html.
-  To change the range of the random numbers, edit MAX_LENGTH below.
-*/
-(function () {
-  var root = document.getElementById('vector-demo');
-  if (!root) return;
+var width = window.innerWidth;
+    var height = window.innerHeight;
+    var scale = 3;
+    //var augRand = Math.floor((Math.random() * 10) + 1);
+    //var addRand = Math.floor((Math.random() * 10) + 1);
+    var aug = 40*5;
+    var add = aug + 40*8;
+   // var text = string.concat(toString(rand), +, toString(rand + 3));
+    
+    var stage = new Konva.Stage({
+      container: 'container',
+      width: document.getElementById('container').offsetWidth,
+      height: height/1.5
+    });
+    var layer = new Konva.Layer();
+    
+    var vectorGroup = new Konva.Group({
+      x: stage.getWidth() / scale - 100,
+      y: stage.getHeight() / scale,
+      
+    });  
 
-  var MAX_LENGTH = 5;                 // each vector is a random whole number from 1 to this
-  var NS = 'http://www.w3.org/2000/svg';
-  var W = 600, X0 = 30, Y = 150;      // drawing area width, left edge, baseline height
-  var stage = root.querySelector('.stage');
-  var eq = root.querySelector('.eq');
-  var a = 3, b = 4, step = 0;
+    var textGroup = new Konva.Group({
 
-  function make(name, attrs, text) {
-    var e = document.createElementNS(NS, name);
-    for (var k in attrs) e.setAttribute(k, attrs[k]);
-    if (text !== undefined) e.textContent = text;
-    stage.appendChild(e);
-  }
-  function arrow(x1, x2, y, color) {
-    make('line', { x1: x1, y1: y, x2: x2, y2: y, class: 'vec ' + color, 'marker-end': 'url(#head-' + color + ')' });
-  }
-  function label(text, x, y, color) {
-    make('text', { x: x, y: y, class: 'vlabel ' + color }, text);
-  }
+    });    
 
-  function render() {
-    stage.innerHTML = '';
-    var total = a + b;
-    var u = Math.min(40, (W - 2 * X0) / total);   // pixels per unit
+    
+    function vectorText(vectext, xpos, ypos, color, opac) { 
+    
+        var that = new Konva.Text({
+      x: xpos,
+      y: ypos,
+      text: vectext,
+      fontStyle: 'bold',
+      fontSize: 30,
+      fontFamily: 'Calibri',
+      opacity: opac,
+      fill: color
+        
+           
+    });    
+        return that; 
+    }    
+      
+      
+    function vector(vert, xpos, ypos, start, end, color, opac) { 
+    
+        var that = new Konva.Arrow({
+      x: xpos,
+      y: ypos,
+      points: [start,vert, end, vert],
+      pointerLength: 20,
+      pointerWidth : 20,
+      fill: color,
+      stroke: color,
+      opacity: opac,
+      strokeWidth: 4
+        
+           
+    });    
+        return that; 
+    }  
+    
+     var augendText = vectorText(aug/40, stage.getWidth() / scale + aug/2 - 120, stage.getHeight() / scale + 20, 'green', 0);  
 
-    make('line', { x1: X0, y1: Y + 14, x2: X0 + total * u, y2: Y + 14, class: 'axis' });
-    for (var i = 0; i <= total; i++) {
-      make('line', { x1: X0 + i * u, y1: Y + 8, x2: X0 + i * u, y2: Y + 20, class: 'axis' });
-      make('text', { x: X0 + i * u, y: Y + 38, class: 'tick' }, i);
-    }
-    if (step >= 1) { arrow(X0, X0 + a * u, Y, 'g'); label(a, X0 + a * u / 2, Y - 14, 'g'); }
-    if (step >= 2) { arrow(X0 + a * u, X0 + total * u, Y, 'b'); label(b, X0 + a * u + b * u / 2, Y - 14, 'b'); }
-    if (step >= 3) { arrow(X0, X0 + total * u, Y - 70, 'r'); label(total, X0 + total * u / 2, Y - 84, 'r'); }
+var addendText = vectorText(add/40, stage.getWidth() / scale + aug/2 - 120+add/2, stage.getHeight() / scale + 20, 'blue', 0);  
+ 
+    var sumText = vectorText(add/40 + aug/40, stage.getWidth() / scale + add/2 - 120, stage.getHeight() / scale - 100, 'red', 0);   
+      
+    var augend = vector(0,0, 0, 0, aug, 'green', 0);
+    var addend = vector(0,0, 0, aug, add, 'blue', 0);  
+    var sum = vector(-50,0, 0, 0, add, 'red', 0);  
+      
 
-    eq.textContent = step >= 3 ? a + ' + ' + b + ' = ' + total : '';
-  }
+    vectorGroup.add(augend);
+    vectorGroup.add(addend);
+    vectorGroup.add(sum);
+    
+    // add to text group
+    layer.add(augendText);  
+      layer.add(addendText);
+      layer.add(sumText);
+      
+    // add the shape to the layer
+    layer.add(vectorGroup);  
+    layer.add(textGroup);
+    
+    // add the layer to the stage
+    stage.add(layer);
+    
+      
+    document.getElementById('Reset').addEventListener('click', function() {
+        augendText.opacity(0);
+        addendText.opacity(0);
+        sumText.opacity(0);
+        augend.opacity(0);
+        addend.opacity(0);
+        sum.opacity(0);
+        layer.draw();
+    }, true);     
+      
+    document.getElementById('Step 1').addEventListener('click', function() {
+        augendText.opacity(1);
+        addendText.opacity(0);
+        sumText.opacity(0);
+        augend.opacity(1);
+        addend.opacity(0);
+        sum.opacity(0);
+        layer.draw();
+    }, true);  
+    
+    document.getElementById('Step 2').addEventListener('click', function() {
+        augendText.opacity(1);
+        addendText.opacity(1);
+        sumText.opacity(0);
+        augend.opacity(1);
+        addend.opacity(1);
+        sum.opacity(0);
+        layer.draw();
+    }, true);    
+      
+    document.getElementById('Step 3').addEventListener('click', function() {
+        augendText.opacity(1);
+        addendText.opacity(1);
+        sumText.opacity(1);
+        augend.opacity(1);
+        addend.opacity(1);
+        sum.opacity(1);
+        layer.draw();
+    }, true);   
+      
+    document.getElementById('New Example').addEventListener('click', function() {
+        augendText.opacity(0);
+        addendText.opacity(0);
+        sumText.opacity(0);
+        augend.opacity(0);
+        addend.opacity(0);
+        sum.opacity(0);
+        
+        //vector length
+        var aug = 40*Math.floor((Math.random() * 10) + 1);
+        var add = aug + 40*Math.floor((Math.random() * 10) + 1);
+        
+        
+        //var augend = vector(0,0, 0, 0, aug, 'green', 0);
+        
+        augend.points([0,0, aug, 0]);
+        addend.points([aug,0, add, 0]);
+        sum.points([0,-50, add, -50]);
+        
+        //augend text
+        augendText.text(aug/40);
+        augendText.x(stage.getWidth() / scale + aug/2 - 120);
+        augendText.y(stage.getHeight() / scale + 20);
+        
+        //addend text
+        addendText.text(add/40);
+        addendText.x(stage.getWidth() / scale + aug/2 - 120+add/2);
+        addendText.y(stage.getHeight() / scale + 20);
+        
+        //sum text
+        sumText.text(aug/40+add/40);
+        sumText.x(stage.getWidth() / scale + add/2 - 120);
+        sumText.y(stage.getHeight() / scale - 100);
+        
+        layer.draw();
 
-  function newExample() {
-    a = 1 + Math.floor(Math.random() * MAX_LENGTH);
-    b = 1 + Math.floor(Math.random() * MAX_LENGTH);
-    step = 0;
-  }
-
-  root.addEventListener('click', function (event) {
-    var button = event.target.closest('button');
-    if (!button) return;
-    var action = button.getAttribute('data-action');
-    if (action === 'new') newExample();
-    else step = Number(action);       // "0" = reset, "1", "2", "3" = steps
-    render();
-  });
-
-  render();
-})();
+    }, true);   
